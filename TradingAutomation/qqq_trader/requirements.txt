@@ -1,0 +1,9 @@
+alpaca-py
+pandas
+pandas-market-calendars
+pyarrow
+APScheduler
+python-dotenv
+yfinance
+numpy
+boto3
