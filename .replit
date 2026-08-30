@@ -1,0 +1,65 @@
+modules = ["python-3.11"]
+[nix]
+channel = "stable-25_05"
+packages = ["arrow-cpp", "glibcLocales", "pkg-config"]
+
+[agent]
+expertMode = true
+
+[userenv]
+
+[userenv.shared]
+AWS_REGION = "us-east-1"
+S3_BUCKET = "qqq-trading-logs-chock"
+USE_S3 = "true"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "QQQ Scheduler"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Health Check"
+
+[[workflows.workflow]]
+name = "QQQ Scheduler"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd TradingAutomation/qqq_trader && PYTHONPATH=/home/runner/workspace python main.py"
+
+[[workflows.workflow]]
+name = "Health Check"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python TradingAutomation/qqq_trader/healthcheck.py"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[deployment]
+deploymentTarget = "vm"
+run = ["bash", "start.sh"]
