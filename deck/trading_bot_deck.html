@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QQQ/TQQQ Trading Bot — Project Reference</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --purple: #bc8cff;
+    --text: #e6edf3;
+    --muted: #8b949e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  .deck { width: 100%; }
+
+  .slide {
+    width: 100%;
+    min-height: 100vh;
+    padding: 60px 80px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    page-break-after: always;
+  }
+
+  .slide-number {
+    position: absolute;
+    top: 24px;
+    right: 40px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  h1 { font-size: 52px; font-weight: 700; line-height: 1.1; margin-bottom: 16px; }
+  h2 { font-size: 36px; font-weight: 700; margin-bottom: 32px; }
+  h3 { font-size: 20px; font-weight: 600; margin-bottom: 12px; color: var(--accent); }
+
+  .subtitle { font-size: 22px; color: var(--muted); line-height: 1.5; max-width: 700px; }
+  .body { font-size: 17px; line-height: 1.7; color: var(--text); }
+
+  /* Cover */
+  .cover { background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); }
+  .cover h1 span { color: var(--accent); }
+  .pill {
+    display: inline-block;
+    background: rgba(88,166,255,0.12);
+    border: 1px solid rgba(88,166,255,0.3);
+    color: var(--accent);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 8px;
+    margin-top: 24px;
+  }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th { background: var(--surface); color: var(--muted); font-weight: 600; text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .tqqq { color: var(--green); font-weight: 700; }
+  .qqq  { color: var(--accent); font-weight: 700; }
+  .cash { color: var(--red); font-weight: 700; }
+
+  /* Cards */
+  .grid { display: grid; gap: 20px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card h3 { margin-bottom: 8px; }
+  .card p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+  /* Layer boxes */
+  .layer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .layer.red   { border-left-color: var(--red); }
+  .layer.yellow{ border-left-color: var(--yellow); }
+  .layer.green { border-left-color: var(--green); }
+  .layer.purple{ border-left-color: var(--purple); }
+  .layer h3 { margin-bottom: 6px; }
+  .layer p { font-size: 15px; color: var(--muted); }
+
+  /* Flow */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .flow-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 120px;
+  }
+  .flow-arrow {
+    color: var(--accent);
+    font-size: 22px;
+    padding: 0 8px;
+  }
+
+  /* Stat boxes */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .stat .val { font-size: 36px; font-weight: 700; color: var(--green); }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* MR score dots */
+  .mr-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 15px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green  { background: var(--green); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-red    { background: var(--red); }
+
+  /* Source rows */
+  .source { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; }
+  .source-icon {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 110px;
+    text-align: center;
+  }
+  .source-body h3 { font-size: 16px; margin-bottom: 4px; }
+  .source-body p  { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+  ul { padding-left: 20px; }
+  li { margin-bottom: 8px; font-size: 16px; line-height: 1.6; }
+  li strong { color: var(--accent); }
+
+  code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    color: var(--purple);
+  }
+
+  .note {
+    background: rgba(88,166,255,0.08);
+    border: 1px solid rgba(88,166,255,0.2);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 20px;
+  }
+
+  .highlight { color: var(--green); font-weight: 700; }
+  .warn { color: var(--yellow); font-weight: 600; }
+
+  @media print {
+    .slide { min-height: 100vh; page-break-after: always; }
+    body { background: white; color: #111; }
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 1 -->
+<div class="slide cover">
+  <div class="slide-number">1 / 15</div>
+  <div class="tag">Personal Reference · July 2026</div>
+  <h1>QQQ / <span>TQQQ</span><br>Trading Bot</h1>
+  <p class="subtitle">Automated end-of-day position manager — signals QQQ data, executes via Alpaca, logs to S3.</p>
+  <div>
+    <span class="pill">Python 3.11</span>
+    <span class="pill">Alpaca API</span>
+    <span class="pill">APScheduler</span>
+    <span class="pill">yfinance</span>
+    <span class="pill">AWS S3</span>
+    <span class="pill">Replit VM</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 2 -->
+<div class="slide">
+  <div class="slide-number">2 / 15</div>
+  <div class="tag">Overview</div>
+  <h2>What This Bot Does</h2>
+  <div class="grid grid-3">
+    <div class="card">
+      <h3>📅 When</h3>
+      <p>Fires once per day at <strong style="color:var(--text)">3:55 PM ET</strong> on NYSE trading days. Five minutes before close — enough time to fill at near-close prices.</p>
+    </div>
+    <div class="card">
+      <h3>📊 Signal</h3>
+      <p>Reads <strong style="color:var(--text)">QQQ daily data</strong>, computes technical indicators, and decides: hold TQQQ, hold QQQ, or go to cash.</p>
+    </div>
+    <div class="card">
+      <h3>⚡ Execute</h3>
+      <p>Submits market orders via <strong style="color:var(--text)">Alpaca paper/live API</strong>. Logs every run to AWS S3. Sends email notifications on start + complete.</p>
+    </div>
+  </div>
+  <div class="note">
+    Signal source is always QQQ. The bot never trades QQQ directly in response to a "bear" signal — it either holds TQQQ, holds QQQ (low conviction), or goes to cash.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 3 -->
+<div class="slide">
+  <div class="slide-number">3 / 15</div>
+  <div class="tag">Architecture</div>
+  <h2>End-to-End Data Flow</h2>
+  <div class="flow" style="margin-bottom:32px">
+    <div class="flow-step">yfinance<br><small style="color:var(--muted);font-weight:400">Daily OHLCV + VIX</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Fetcher<br><small style="color:var(--muted);font-weight:400">data/fetcher.py</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Strategy<br><small style="color:var(--muted);font-weight:400">strategy.py</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Reconciler<br><small style="color:var(--muted);font-weight:400">orders/reconciler.py</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Alpaca<br><small style="color:var(--muted);font-weight:400">Market order</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">S3 + Email<br><small style="color:var(--muted);font-weight:400">logger + notifier</small></div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>Parquet Cache</h3>
+      <p>Historical QQQ and VIX data stored locally as <code>.parquet</code> files. Updated on every run. Backfills previous day's close using yfinance each morning.</p>
+    </div>
+    <div class="card">
+      <h3>Stateful Scheduler</h3>
+      <p>APScheduler runs a <code>BlockingScheduler</code> in the VM. It holds the process alive and fires <code>run_pipeline()</code> at exactly 15:55 ET via cron trigger.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 4 -->
+<div class="slide">
+  <div class="slide-number">4 / 15</div>
+  <div class="tag">Data Sources</div>
+  <h2>What Data, From Where, and When</h2>
+
+  <div class="source">
+    <div class="source-icon">yfinance</div>
+    <div class="source-body">
+      <h3>QQQ Daily Bar (OHLCV)</h3>
+      <p>Fetched once per run at 3:55 PM ET. Returns the official daily bar — open, high, low, close, volume. Also used to <strong>backfill the previous day's close</strong> at the start of each run, correcting any intraday proxy prices stored from earlier that session.</p>
+    </div>
+  </div>
+
+  <div class="source">
+    <div class="source-icon">yfinance</div>
+    <div class="source-body">
+      <h3>VIX (^VIX) Daily Close</h3>
+      <p>Fetched once per run. VIX is not available on Alpaca's free tier. Used in MR score calculation — VIX &gt; 20 adds 1 point to the mean-reversion score, indicating elevated fear and a better buying opportunity.</p>
+    </div>
+  </div>
+
+  <div class="source">
+    <div class="source-icon">Alpaca</div>
+    <div class="source-body">
+      <h3>TQQQ Latest Trade Price</h3>
+      <p>Fetched from Alpaca's free IEX feed only when the signal calls for TQQQ. Used to <strong>size the position</strong> (shares = equity × allocation ÷ TQQQ price). Not used for signal computation — QQQ data drives all decisions.</p>
+    </div>
+  </div>
+
+  <div class="source">
+    <div class="source-icon">Alpaca</div>
+    <div class="source-body">
+      <h3>Account Equity + Open Positions</h3>
+      <p>Fetched from Alpaca Trading API. Equity is used to calculate target dollar allocation. Open positions determine current shares held and whether an instrument switch (TQQQ↔QQQ) is needed before placing the new order.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 5 -->
+<div class="slide">
+  <div class="slide-number">5 / 15</div>
+  <div class="tag">Strategy</div>
+  <h2>Four-Layer Decision System</h2>
+  <p class="body" style="margin-bottom:28px">Layers are evaluated in priority order. The first layer that triggers wins — lower layers are not evaluated.</p>
+
+  <div class="layer red">
+    <h3>Layer 1 — SMA200 Bear Filter (highest priority)</h3>
+    <p>If QQQ close &lt; 200-day SMA → <strong style="color:var(--red)">Go to cash</strong>. Full bear-market exit. Protects against 2022-style drawdowns where TQQQ lost 75%+.</p>
+  </div>
+  <div class="layer yellow">
+    <h3>Layer 2 — Candle Shock Protection</h3>
+    <p>If QQQ drops &gt;2% in one day AND closes below SMA10 → <strong style="color:var(--red)">Go to cash</strong>. Stay out until price recovers above SMA10. Catches flash crashes and Fed-shock events before SMA200 reacts.</p>
+  </div>
+  <div class="layer purple">
+    <h3>Layer 3 — SMA50 Protection Mode</h3>
+    <p>If QQQ closes below SMA50 (but above SMA200) → <strong style="color:var(--accent)">QQQ 25%</strong>. Correction zone. Exit when price recovers above SMA50 or MR score ≥ 3.</p>
+  </div>
+  <div class="layer green">
+    <h3>Layer 4 — MR Score Sizing (bull mode)</h3>
+    <p>Score 5 mean-reversion signals. High conviction = <strong style="color:var(--green)">TQQQ 100%</strong>. Low conviction = <strong style="color:var(--accent)">QQQ</strong> (no leverage). Details on next slide.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 6 -->
+<div class="slide">
+  <div class="slide-number">6 / 15</div>
+  <div class="tag">Strategy · Layer 4</div>
+  <h2>MR Score — Mean Reversion Signals</h2>
+  <p class="body" style="margin-bottom:24px">Five binary conditions, each worth 1 point. The score determines instrument and allocation.</p>
+
+  <table style="margin-bottom:32px">
+    <tr><th>Signal</th><th>Condition</th><th>Why it matters</th></tr>
+    <tr><td><strong>Pullback</strong></td><td>Close &lt; SMA20</td><td style="color:var(--muted)">Short-term weakness — QQQ below 20-day average signals a buying opportunity</td></tr>
+    <tr><td><strong>Oversold</strong></td><td>RSI &lt; 40</td><td style="color:var(--muted)">Momentum washed out — historically strong mean-reversion setups at these RSI levels</td></tr>
+    <tr><td><strong>Two Down Days</strong></td><td>2 consecutive red closes</td><td style="color:var(--muted)">Sellers exhausting — next session tends to bounce after back-to-back declines</td></tr>
+    <tr><td><strong>VIX Fear</strong></td><td>VIX &gt; 20</td><td style="color:var(--muted)">Elevated fear = cheap options, institutions hedged, market primed to snap back</td></tr>
+    <tr><td><strong>BB Below Mid</strong></td><td>Price below Bollinger midline</td><td style="color:var(--muted)">Statistically below average — Bollinger bands are a probability envelope around price</td></tr>
+  </table>
+
+  <table>
+    <tr><th>MR Score</th><th>Instrument</th><th>Allocation</th><th>Logic</th></tr>
+    <tr><td>0 — clean uptrend</td><td class="qqq">QQQ</td><td>100%</td><td style="color:var(--muted)">No dip signals. Full capital deployed, no leverage drag</td></tr>
+    <tr><td>1 — mild pullback</td><td class="qqq">QQQ</td><td>75%</td><td style="color:var(--muted)">Slight weakness. Lean in without leverage</td></tr>
+    <tr><td>2+ — strong pullback</td><td class="tqqq">TQQQ</td><td>100%</td><td style="color:var(--muted)">Multiple oversold signals. Max the dip with leverage</td></tr>
+    <tr><td>Overbought</td><td class="qqq">QQQ</td><td>25%</td><td style="color:var(--muted)">RSI &gt; 70 or price &gt;5% above SMA20. Reduce before pullback</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 7 -->
+<div class="slide">
+  <div class="slide-number">7 / 15</div>
+  <div class="tag">Strategy</div>
+  <h2>Complete Signal Rule Table</h2>
+  <table>
+    <tr><th>Condition (evaluated top → bottom)</th><th>Instrument</th><th>Allocation</th></tr>
+    <tr><td>Close &lt; SMA200 — full bear market</td><td class="cash">Cash</td><td class="cash">0%</td></tr>
+    <tr><td>Day drop &gt;2% AND close &lt; SMA10 — shock candle</td><td class="cash">Cash</td><td class="cash">0%</td></tr>
+    <tr><td>Close &lt; SMA50 — correction zone (above SMA200)</td><td class="qqq">QQQ</td><td>25%</td></tr>
+    <tr><td>Overbought — RSI &gt; 70 or price &gt; SMA20 × 1.05</td><td class="qqq">QQQ</td><td>25%</td></tr>
+    <tr><td>Bull mode, MR score = 1 — mild pullback</td><td class="qqq">QQQ</td><td>75%</td></tr>
+    <tr><td>Bull mode, MR score = 0 — clean uptrend</td><td class="qqq">QQQ</td><td>100%</td></tr>
+    <tr><td>Bull mode, MR score ≥ 2 — strong pullback / oversold</td><td class="tqqq">TQQQ</td><td>100%</td></tr>
+  </table>
+  <div class="note" style="margin-top:24px">
+    <strong>Key design choice:</strong> TQQQ (3× leverage) is only used when multiple oversold signals align. All other bull-market conditions use QQQ to avoid volatility decay in choppy or overbought markets.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 8 -->
+<div class="slide">
+  <div class="slide-number">8 / 15</div>
+  <div class="tag">Execution</div>
+  <h2>Order Execution Logic</h2>
+
+  <div class="grid grid-2" style="margin-bottom:24px">
+    <div class="card">
+      <h3>Position Sizing</h3>
+      <p>Target shares = <code>equity × allocation ÷ price</code>.<br><br>
+      Example: $97,000 equity, TQQQ 100%, price $75<br>
+      → Target = 1,293 shares</p>
+    </div>
+    <div class="card">
+      <h3>Delta Calculation</h3>
+      <p>Delta = target shares − current shares.<br><br>
+      Positive delta → BUY order<br>
+      Negative delta → SELL order<br>
+      Zero delta → no order submitted</p>
+    </div>
+  </div>
+
+  <div class="layer green">
+    <h3>At 100% Allocation — No Daily Rebalancing</h3>
+    <p>When signal stays at 100% in the same instrument, existing shares are held as-is. No rebalancing sell. The portfolio value naturally tracks the position price. Only trades when switching instruments or buying in from cash.</p>
+  </div>
+
+  <div class="layer yellow">
+    <h3>Instrument Switch (TQQQ ↔ QQQ)</h3>
+    <p>1. Submit SELL order for full old position → 2. Poll for fill (up to timeout) → 3. Submit BUY for new target shares. If sell fills but buy fails, error is logged and email sent — bot does not retry automatically.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 9 -->
+<div class="slide">
+  <div class="slide-number">9 / 15</div>
+  <div class="tag">Data Pipeline</div>
+  <h2>How Historical Data Stays Accurate</h2>
+
+  <ul style="margin-bottom:28px">
+    <li><strong>Parquet files</strong> store daily QQQ OHLCV and VIX going back to June 2021 — 1,265+ rows.</li>
+    <li><strong>On every run</strong>, the fetcher loads the parquet, then runs a backfill pass using yfinance to correct any rows where the stored close differs from the official daily close by more than $0.01.</li>
+    <li><strong>Why backfill?</strong> When the bot runs at 3:55 PM (market still open), the "close" is a near-close proxy. The next day, yfinance provides the actual official close, and the backfill corrects the previous row.</li>
+    <li><strong>Today's bar</strong> is fetched fresh from yfinance (official daily OHLCV) with Alpaca's IEX feed as a fallback if yfinance is unavailable.</li>
+    <li><strong>Alpaca free tier</strong> does not allow querying recent historical daily bars (403 error). All historical corrections use yfinance instead.</li>
+  </ul>
+
+  <div class="flow">
+    <div class="flow-step">Load parquet<br><small style="color:var(--muted);font-weight:400">1,265 rows</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Backfill pass<br><small style="color:var(--muted);font-weight:400">yfinance last 15d</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Fetch today<br><small style="color:var(--muted);font-weight:400">yfinance daily bar</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Add indicators<br><small style="color:var(--muted);font-weight:400">SMA, RSI, BB</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Save parquet<br><small style="color:var(--muted);font-weight:400">updated</small></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 10 -->
+<div class="slide">
+  <div class="slide-number">10 / 15</div>
+  <div class="tag">Logging & Monitoring</div>
+  <h2>What Gets Logged and Where</h2>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>📦 AWS S3 — Trade Log</h3>
+      <p>Every run appends a JSON record to <code>trade_log.csv</code> in S3 bucket <code>qqq-trading-logs-chock</code>. Fields include: timestamp, ticker, allocation %, direction, close price, equity, target shares, delta, order ID, full signal detail (all MR components), and position held before the trade.</p>
+    </div>
+    <div class="card">
+      <h3>📊 AWS S3 — Dashboard</h3>
+      <p>After every run, a static HTML dashboard is generated from the trade log and uploaded to S3. Shows all historical trades, signal details, and portfolio state. Publicly accessible at the S3 URL (requires bucket to be public in AWS console).</p>
+    </div>
+    <div class="card">
+      <h3>📧 Gmail — Email Alerts</h3>
+      <p>Two emails per run: <strong>Started</strong> (signal + allocation when pipeline begins) and <strong>Done</strong> (order ID, shares bought/sold, final equity). Error emails on any failure. Uses Gmail app password stored as Replit Secret.</p>
+    </div>
+    <div class="card">
+      <h3>📋 Replit — Console Logs</h3>
+      <p>Full structured logging with timestamps and log levels. All pipeline steps (data fetch, strategy signal, sizing, order submission) logged with exact values. Visible in the QQQ Scheduler workflow console in the Replit IDE.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 11 -->
+<div class="slide">
+  <div class="slide-number">11 / 15</div>
+  <div class="tag">Risk Management</div>
+  <h2>Why Each Protection Layer Exists</h2>
+
+  <table>
+    <tr><th>Risk</th><th>Protection</th><th>Mechanism</th></tr>
+    <tr>
+      <td><strong>Bear market</strong><br><small style="color:var(--muted)">QQQ loses 30–40%</small></td>
+      <td class="cash">Full cash exit</td>
+      <td style="color:var(--muted)">SMA200 filter — exits when price crosses below 200-day average. Late but avoids the worst 70–80% of a bear drawdown.</td>
+    </tr>
+    <tr>
+      <td><strong>Flash crash / shock</strong><br><small style="color:var(--muted)">Single-day gap-down</small></td>
+      <td class="cash">Cash until recovery</td>
+      <td style="color:var(--muted)">Candle filter — >2% drop + close below SMA10. Exits before SMA200 reacts. Re-enters next close above SMA10.</td>
+    </tr>
+    <tr>
+      <td><strong>Mid-term correction</strong><br><small style="color:var(--muted)">10–20% pullback</small></td>
+      <td class="qqq">QQQ 25%</td>
+      <td style="color:var(--muted)">SMA50 protection — reduces to 1× exposure during correction. No leverage when trend is weakening.</td>
+    </tr>
+    <tr>
+      <td><strong>Overbought / extended</strong><br><small style="color:var(--muted)">RSI > 70, price stretched</small></td>
+      <td class="qqq">QQQ 25%</td>
+      <td style="color:var(--muted)">Overbought filter — reduces position when a pullback is statistically more likely.</td>
+    </tr>
+    <tr>
+      <td><strong>Choppy / sideways</strong><br><small style="color:var(--muted)">TQQQ volatility decay</small></td>
+      <td class="qqq">QQQ 100%</td>
+      <td style="color:var(--muted)">MR score 0 → QQQ instead of TQQQ. Avoids leverage decay in low-conviction, non-trending markets.</td>
+    </tr>
+    <tr>
+      <td><strong>Leveraged position sizing</strong></td>
+      <td class="tqqq">TQQQ only at MR ≥ 2</td>
+      <td style="color:var(--muted)">3× leverage reserved for high-conviction pullbacks with multiple oversold signals. Never used in unclear conditions.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 12 -->
+<div class="slide">
+  <div class="slide-number">12 / 15</div>
+  <div class="tag">Performance</div>
+  <h2>Backtest Results (Jan 2022 – Jun 2026)</h2>
+  <p class="body" style="margin-bottom:28px;color:var(--muted)">Starting capital $10,000. Original all-TQQQ strategy. Current hybrid QQQ/TQQQ variant not yet backtested.</p>
+
+  <div class="stat-grid" style="margin-bottom:32px">
+    <div class="stat"><div class="val">35.2%</div><div class="lbl">CAGR<br>Strategy</div></div>
+    <div class="stat"><div class="val">1.42</div><div class="lbl">Sharpe Ratio<br>Strategy</div></div>
+    <div class="stat"><div class="val">-19.4%</div><div class="lbl" style="color:var(--yellow)">Max Drawdown<br>Strategy</div></div>
+    <div class="stat"><div class="val" style="color:var(--muted)">15.0%</div><div class="lbl">CAGR<br>QQQ Buy & Hold</div></div>
+  </div>
+
+  <table>
+    <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Max Drawdown</th><th>Note</th></tr>
+    <tr>
+      <td><strong>Final (with candle filter)</strong></td>
+      <td class="highlight">35.2%</td>
+      <td class="highlight">1.42</td>
+      <td class="warn">-19.4%</td>
+      <td style="color:var(--muted)">Current base strategy</td>
+    </tr>
+    <tr>
+      <td>No candle filter</td>
+      <td>40.2%</td>
+      <td>1.35</td>
+      <td style="color:var(--red)">-27.9%</td>
+      <td style="color:var(--muted)">Higher return, worse drawdown</td>
+    </tr>
+    <tr>
+      <td>QQQ Buy &amp; Hold</td>
+      <td style="color:var(--muted)">15.0%</td>
+      <td style="color:var(--muted)">0.72</td>
+      <td style="color:var(--red)">-35.2%</td>
+      <td style="color:var(--muted)">Benchmark</td>
+    </tr>
+  </table>
+
+  <div class="note">The candle filter cost 5% CAGR (40% → 35%) but cut max drawdown from -27.9% to -19.4%. For a 3× leveraged instrument, protecting against deep drawdowns was prioritised over raw return.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 13 -->
+<div class="slide">
+  <div class="slide-number">13 / 15</div>
+  <div class="tag">Deployment</div>
+  <h2>How It's Deployed</h2>
+
+  <div class="grid grid-2" style="margin-bottom:24px">
+    <div class="card">
+      <h3>Replit VM</h3>
+      <p>Deployed as a <strong style="color:var(--text)">Reserved VM</strong> on Replit (paid plan). Always running — never sleeps. No browser tab or uptime monitor needed. Production URL: <code>trading-automation.replit.app</code>.</p>
+    </div>
+    <div class="card">
+      <h3>start.sh</h3>
+      <p>Entry point for the VM. Starts two processes: <br><br>
+      1. <code>healthcheck.py</code> in background (port 8080, returns "OK")<br>
+      2. <code>main.py</code> in foreground (APScheduler — blocks until 3:55 PM)</p>
+    </div>
+  </div>
+
+  <div class="layer green">
+    <h3>Secrets — Stored in Replit Secrets (never in code)</h3>
+    <p><code>ALPACA_KEY</code> · <code>ALPACA_SECRET</code> · <code>GMAIL_APP_PASSWORD</code> · <code>AWS_ACCESS_KEY_ID</code> · <code>AWS_SECRET_ACCESS_KEY</code> · <code>SESSION_SECRET</code></p>
+  </div>
+
+  <div class="layer">
+    <h3>Environment Variables</h3>
+    <p><code>AWS_REGION=us-east-1</code> · <code>S3_BUCKET=qqq-trading-logs-chock</code> · <code>USE_S3=true</code></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 14 -->
+<div class="slide">
+  <div class="slide-number">14 / 15</div>
+  <div class="tag">Operations</div>
+  <h2>Daily Run Timeline</h2>
+
+  <table>
+    <tr><th>Time (ET)</th><th>Event</th><th>Details</th></tr>
+    <tr><td><strong>Market open</strong></td><td>VM running, scheduler waiting</td><td style="color:var(--muted)">APScheduler idle. Health check server responding on port 8080.</td></tr>
+    <tr><td><strong>3:55 PM</strong></td><td>Pipeline fires</td><td style="color:var(--muted)">yfinance fetches today's QQQ bar + VIX. Backfill corrects yesterday's close if needed.</td></tr>
+    <tr><td><strong>3:55 PM + 2s</strong></td><td>Strategy computed</td><td style="color:var(--muted)">All 4 layers evaluated. Signal determined (cash / QQQ / TQQQ + allocation %).</td></tr>
+    <tr><td><strong>3:55 PM + 4s</strong></td><td>Email: Started</td><td style="color:var(--muted)">Notification sent with ticker, allocation, and MR score.</td></tr>
+    <tr><td><strong>3:55 PM + 5s</strong></td><td>Order submitted</td><td style="color:var(--muted)">Alpaca market order placed (if delta ≠ 0). Instrument switch closes old position first.</td></tr>
+    <tr><td><strong>3:55 PM + 8s</strong></td><td>Logged to S3</td><td style="color:var(--muted)">Trade record appended to trade_log.csv. Dashboard HTML regenerated and uploaded.</td></tr>
+    <tr><td><strong>3:55 PM + 10s</strong></td><td>Email: Done</td><td style="color:var(--muted)">Notification with order ID, shares, final equity, and full signal breakdown.</td></tr>
+    <tr><td><strong>4:00 PM close</strong></td><td>Order fills</td><td style="color:var(--muted)">Market order fills at or near closing price. Position confirmed in Alpaca.</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ SLIDE 15 -->
+<div class="slide">
+  <div class="slide-number">15 / 15</div>
+  <div class="tag">Manual Operations</div>
+  <h2>How to Trigger Manually</h2>
+
+  <div class="grid grid-3" style="margin-bottom:28px">
+    <div class="card">
+      <h3>--force</h3>
+      <p>Runs full pipeline, bypasses calendar check. Submits real orders. Use when the scheduler missed the 3:55 PM window.</p>
+      <p style="margin-top:10px"><code>python main.py --force</code></p>
+    </div>
+    <div class="card">
+      <h3>--dry-run</h3>
+      <p>Runs full pipeline including signal and sizing. Skips calendar check and order submission. Safe to run anytime to inspect the signal.</p>
+      <p style="margin-top:10px"><code>python main.py --dry-run</code></p>
+    </div>
+    <div class="card">
+      <h3>--now</h3>
+      <p>Runs pipeline immediately, respects the calendar check. Will exit without trading on non-market days.</p>
+      <p style="margin-top:10px"><code>python main.py --now</code></p>
+    </div>
+  </div>
+
+  <div class="layer">
+    <h3>Via Replit Agent</h3>
+    <p>Ask: "Run now and send position" — the agent runs <code>python main.py --force</code>, reports the signal, order details, and confirms dashboard is updated on S3.</p>
+  </div>
+
+  <div class="note">
+    All commands must be run from <code>TradingAutomation/qqq_trader/</code> with <code>PYTHONPATH=/home/runner/workspace</code> set, or via the wrapper: <code>cd TradingAutomation/qqq_trader && PYTHONPATH=/home/runner/workspace python main.py --force</code>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
