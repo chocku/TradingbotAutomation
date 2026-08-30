@@ -1,0 +1,23 @@
+# Credentials and local environment
+.env
+*.env
+*API Key*.txt
+
+# Python caches and local packages
+__pycache__/
+*.py[cod]
+.pythonlibs/
+.cache/
+
+# Runtime and generated data
+*.parquet
+*.jsonl
+TradingAutomation/qqq_trader/dashboard.html
+
+# Archives and local assets
+*.zip
+attached_assets/
+
+# Replit and editor metadata
+.upm/
+.DS_Store
