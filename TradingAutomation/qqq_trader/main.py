@@ -87,7 +87,7 @@ def run_pipeline(dry_run: bool = False, force: bool = False) -> None:
     except Exception as e:
         log.critical("Data fetch failed — halting: %s", e)
         log_run("N/A", 0.0, "flat", 0.0, 0.0, 0, 0.0, 0, None, error=str(e))
-        notify_error("data fetch", str(e))
+        notify_error("data fetch", str(e), dry_run=dry_run)
         return
 
     # ── 2. Run strategy ──────────────────────────────────────────────────────
@@ -96,7 +96,7 @@ def run_pipeline(dry_run: bool = False, force: bool = False) -> None:
     except Exception as e:
         log.critical("Strategy exception — halting (never default to a position): %s", e)
         log_run("N/A", 0.0, "flat", 0.0, 0.0, 0, 0.0, 0, None, error=str(e))
-        notify_error("strategy", str(e))
+        notify_error("strategy", str(e), dry_run=dry_run)
         return
 
     # ── 3. Portfolio equity ──────────────────────────────────────────────────
@@ -106,7 +106,7 @@ def run_pipeline(dry_run: bool = False, force: bool = False) -> None:
         log.critical("Failed to fetch account equity — halting: %s", e)
         log_run(signal.ticker, signal.allocation_pct, signal.direction,
                 0.0, 0.0, 0, 0.0, 0, None, error=str(e))
-        notify_error("portfolio equity fetch", str(e))
+        notify_error("portfolio equity fetch", str(e), dry_run=dry_run)
         return
 
     # ── 4. Execution price ───────────────────────────────────────────────────
@@ -116,11 +116,14 @@ def run_pipeline(dry_run: bool = False, force: bool = False) -> None:
         log.critical("Failed to fetch execution price — halting: %s", e)
         log_run(signal.ticker, signal.allocation_pct, signal.direction,
                 0.0, equity, 0, 0.0, 0, None, error=str(e))
-        notify_error("execution price fetch", str(e))
+        notify_error("execution price fetch", str(e), dry_run=dry_run)
         return
 
     # ── Notify started ───────────────────────────────────────────────────────
-    notify_started(signal.ticker, f"{int(signal.allocation_pct * 100)}%", signal.detail.get("mr_score", 0), equity)
+    notify_started(
+        signal.ticker, f"{int(signal.allocation_pct * 100)}%", signal.detail.get("mr_score", 0), equity,
+        signal_detail=signal.detail, dry_run=dry_run,
+    )
 
     # ── 5. Size position ─────────────────────────────────────────────────────
     target_shares = calculate_target_shares(equity, signal.allocation_pct, exec_price)
@@ -168,8 +171,9 @@ def run_pipeline(dry_run: bool = False, force: bool = False) -> None:
         delta          = target_shares
 
     # ── 8. Execute buy ───────────────────────────────────────────────────────
-    order_id = None
-    error    = None
+    order_id     = None
+    order_status = "dry_run" if dry_run else "not_submitted"
+    error        = None
     if dry_run:
         log.info(
             "[DRY RUN] Would submit: ticker=%s delta=%+d side=%s — no order sent",
@@ -177,11 +181,12 @@ def run_pipeline(dry_run: bool = False, force: bool = False) -> None:
         )
     else:
         try:
-            order_id = submit_order(signal.ticker, delta, trading_client)
+            order_id, order_status = submit_order(signal.ticker, delta, trading_client)
         except Exception as e:
-            error = str(e)
+            error        = str(e)
+            order_status = "failed"
             log.error("Order rejected — not retrying: %s", e)
-            notify_error("order submission", str(e))
+            notify_error("order submission", str(e), dry_run=dry_run)
 
     # ── 9. Log ───────────────────────────────────────────────────────────────
     log_run(
@@ -203,10 +208,14 @@ def run_pipeline(dry_run: bool = False, force: bool = False) -> None:
         alloc=f"{int(signal.allocation_pct * 100)}%",
         delta=delta,
         order_id=order_id,
+        order_status=order_status,
         exec_price=exec_price,
         equity=equity,
         current_shares=current_shares,
         target_shares=target_shares,
+        signal_detail=signal.detail,
+        position_before=position_before,
+        dry_run=dry_run,
     )
     log.info("=== Pipeline complete ===")
     try:

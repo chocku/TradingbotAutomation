@@ -55,3 +55,30 @@ def run_strategy(df: pd.DataFrame) -> StrategySignal:
         pos["mr_score"], pos["in_bull"],
     )
     return signal
+
+
+def describe_signal_detail(detail: dict) -> str:
+    """One-line human-readable summary of why the strategy chose this signal."""
+    regime = "BULL" if detail.get("in_bull") else "BEAR"
+    c = detail.get("components", {}) or {}
+    v = detail.get("values", {}) or {}
+
+    active = [
+        name for name, val in [
+            ("pullback", c.get("pullback")),
+            ("oversold", c.get("oversold")),
+            ("two-day drop", c.get("two_down")),
+            ("VIX fear", c.get("vix_fear")),
+            ("below lower band", c.get("bb_below")),
+        ] if val
+    ]
+    triggers = ", ".join(active) if active else "no dip triggers active"
+
+    stats = []
+    if v.get("rsi_14") is not None:
+        stats.append(f"RSI {v['rsi_14']:.1f}")
+    if v.get("vix") is not None:
+        stats.append(f"VIX {v['vix']:.1f}")
+    stats_str = f" ({', '.join(stats)})" if stats else ""
+
+    return f"{regime} regime, {triggers}{stats_str}"
