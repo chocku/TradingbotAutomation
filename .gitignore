@@ -13,6 +13,7 @@ __pycache__/
 *.parquet
 *.jsonl
 TradingAutomation/qqq_trader/dashboard.html
+TradingAutomation/qqq_trader/logs/
 
 # Archives and local assets
 *.zip

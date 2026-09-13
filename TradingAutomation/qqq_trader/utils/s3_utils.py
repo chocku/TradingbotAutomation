@@ -79,3 +79,43 @@ def upload_performance_to_s3(data: dict) -> None:
 def get_dashboard_url() -> str:
     """Return public S3 URL for dashboard."""
     return f"https://{S3_BUCKET}.s3.amazonaws.com/{S3_DASHBOARD_KEY}"
+
+
+_FORCE_DRY_RUN_KEY = "control/force_dry_run.flag"
+
+
+def consume_force_dry_run_marker() -> bool:
+    """
+    Check for a one-shot S3 marker that forces the next boot-triggered run
+    to be a dry-run, then delete it. Used to validate the real pipeline
+    (data/signal/sizing/S3/email, no order) via the normal boot trigger
+    without racing a manual command against the boot trigger's own self-stop.
+    """
+    try:
+        s3_client.head_object(Bucket=S3_BUCKET, Key=_FORCE_DRY_RUN_KEY)
+    except ClientError as e:
+        if e.response["Error"]["Code"] in ("404", "NoSuchKey"):
+            return False
+        raise
+    s3_client.delete_object(Bucket=S3_BUCKET, Key=_FORCE_DRY_RUN_KEY)
+    return True
+
+
+def backup_parquet_to_s3() -> None:
+    """
+    Upload the QQQ/VIX parquet history files to S3 after each run.
+
+    The EC2 instance's local disk is the only copy of this history — this
+    backup exists so a lost/corrupted volume doesn't erase months of the
+    SMA-200 lookback window the strategy depends on.
+    """
+    from config import PARQUET_QQQ, PARQUET_VIX
+    for local_path, key in [
+        (PARQUET_QQQ, "data/QQQ_daily_full.parquet"),
+        (PARQUET_VIX, "data/VIX_daily.parquet"),
+    ]:
+        try:
+            s3_client.upload_file(local_path, S3_BUCKET, key)
+            log.info("Backed up %s to s3://%s/%s", local_path, S3_BUCKET, key)
+        except Exception as e:
+            log.error("Failed to back up %s to S3: %s", local_path, e)

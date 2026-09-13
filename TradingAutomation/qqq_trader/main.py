@@ -24,8 +24,10 @@ logging.basicConfig(
 )
 log = logging.getLogger("main")
 
-# Add qqq_trader parent to path so strategy.py is importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add project root to path so strategy.py is importable.
+# (On Replit this is redundant with the PYTHONPATH set in .replit, but this
+# makes the script self-locating so it also works standalone, e.g. on EC2.)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.trading.client import TradingClient
