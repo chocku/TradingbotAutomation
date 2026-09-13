@@ -18,7 +18,7 @@ from pathlib import Path
 
 import boto3
 
-REPO_ROOT   = Path(__file__).resolve().parent.parent.parent
+REPO_ROOT   = Path(__file__).resolve().parent.parent
 INSTANCE_ID = "i-0f5546297f99489aa"
 BUCKET      = "qqq-trading-logs-chock"
 REGION      = "us-east-1"
